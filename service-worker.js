@@ -1,56 +1,37 @@
-const CACHE_NAME = "landing-v1";
-const APP_SHELL = [
-  "./",
-  "./index.html",
-  "./styles.css",
-  "./manifest.json",
-  "./icon-512.png"
+const CACHE_NAME = 'pwa-cache-v1';
+const ASSETS = [
+  './',
+  './index.html',
+  './style.css',
+  './icon-512.png',
+  './manifest.json'
 ];
 
-self.addEventListener("install", (event) => {
+// Installation du Service Worker et mise en cache des ressources de base
+self.addEventListener('install', (event) => {
   event.waitUntil(
-    caches.open(CACHE_NAME).then((cache) => cache.addAll(APP_SHELL))
+    caches.open(CACHE_NAME).then((cache) => {
+      return cache.addAll(ASSETS);
+    })
   );
-  self.skipWaiting();
 });
 
-self.addEventListener("activate", (event) => {
+// Activation et nettoyage des anciens caches
+self.addEventListener('activate', (event) => {
   event.waitUntil(
-    caches.keys().then((cacheNames) =>
-      Promise.all(
-        cacheNames
-          .filter((cacheName) => cacheName !== CACHE_NAME)
-          .map((cacheName) => caches.delete(cacheName))
-      )
-    )
+    caches.keys().then((keys) => {
+      return Promise.all(
+        keys.filter((key) => key !== CACHE_NAME).map((key) => caches.delete(key))
+      );
+    })
   );
-  self.clients.claim();
 });
 
-self.addEventListener("fetch", (event) => {
-  const request = event.request;
-  if (request.method !== "GET" || new URL(request.url).origin !== self.location.origin) {
-    return;
-  }
-
-  if (request.mode === "navigate") {
-    event.respondWith(
-      fetch(request).catch(() =>
-        caches.match(request).then((response) => response || caches.match("./index.html"))
-      )
-    );
-    return;
-  }
-
+// Intercept et réponse avec le cache si on est hors-ligne
+self.addEventListener('fetch', (event) => {
   event.respondWith(
-    caches.match(request).then((response) =>
-      response || fetch(request).then((networkResponse) => {
-        if (networkResponse.ok) {
-          const responseCopy = networkResponse.clone();
-          caches.open(CACHE_NAME).then((cache) => cache.put(request, responseCopy));
-        }
-        return networkResponse;
-      })
-    )
+    caches.match(event.request).then((cachedResponse) => {
+      return cachedResponse || fetch(event.request);
+    })
   );
 });
