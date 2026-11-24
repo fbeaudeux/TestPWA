@@ -1,16 +1,17 @@
 {
-  "name": "Landing",
-  "short_name": "Landing",
-  "start_url": "./",
-  "scope": "./",
-  "display": "standalone",
-  "background_color": "#ffffff",
-  "theme_color": "#ffffff",
+  "short_name": "TestPWA",
+  "name": "Mon Application de Test PWA",
   "icons": [
     {
-      "src": "icon-512.png",
+      "src": "./icon-512.png",
+      "type": "image/png",
       "sizes": "512x512",
-      "type": "image/png"
+      "purpose": "any"
     }
-  ]
+  ],
+  "start_url": "./index.html",
+  "scope": "./",
+  "background_color": "#2563EB",
+  "theme_color": "#2563EB",
+  "display": "standalone"
 }
